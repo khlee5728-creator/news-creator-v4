@@ -44,7 +44,7 @@ export const apiService = {
     // Level별 기사 길이 설정
     const lengthConfig = {
       Beginner: {
-        paragraphs: "2-3",
+        paragraphs: "1",
         sentences: "3-4 sentences per paragraph",
         description: "short and simple sentences, easy vocabulary",
         wordCount: "approximately 100-150 words",
@@ -53,23 +53,23 @@ export const apiService = {
         maxWords: 150,
       },
       Intermediate: {
-        paragraphs: "3-4",
+        paragraphs: "2",
         sentences: "4-5 sentences per paragraph",
         description: "moderate length sentences, intermediate vocabulary",
-        wordCount: "approximately 200-300 words",
+        wordCount: "approximately 150-250 words",
         maxTokens: 800,
-        minWords: 200,
-        maxWords: 300,
+        minWords: 150,
+        maxWords: 250,
       },
       Advanced: {
-        paragraphs: "4-5",
+        paragraphs: "3",
         sentences: "5-6 sentences per paragraph",
         description:
           "longer sentences with more complex structures, advanced vocabulary",
-        wordCount: "approximately 350-500 words",
+        wordCount: "approximately 250-400 words",
         maxTokens: 1200,
-        minWords: 350,
-        maxWords: 500,
+        minWords: 250,
+        maxWords: 400,
       },
     };
 
@@ -125,34 +125,81 @@ Format your response as JSON with exactly these fields:
       });
 
       // OpenAI Chat Completions 응답 형식 처리
-      const content = response.data.choices?.[0]?.message?.content || "";
+      let content = response.data.choices?.[0]?.message?.content || "";
 
       if (!content) {
         throw new Error("Empty response from API");
       }
 
-      // JSON 응답 파싱 시도
-      try {
-        const parsed = JSON.parse(content);
-        const articleContent = parsed.content || content;
-        const wordCount = articleContent.split(/\s+/).length;
+      // 이중 문자열화된 JSON 문자열 처리 (예: "\"{...}\"")
+      content = content.trim();
+      if (content.startsWith('"') && content.endsWith('"')) {
+        try {
+          content = JSON.parse(content);
+        } catch (e) {
+          // 이중 파싱 실패 시 원본 유지
+        }
+      }
 
-        // 길이 검증 및 필요시 재요청
-        if (wordCount < config.minWords || wordCount > config.maxWords) {
-          console.warn(
-            `Article word count (${wordCount}) is outside target range (${config.minWords}-${config.maxWords}). Consider regenerating.`
-          );
+      // JSON 응답 파싱 시도
+      let parsed;
+      try {
+        // 문자열인 경우 JSON 파싱 시도
+        if (typeof content === "string") {
+          // 마크다운 코드 블록 제거 (```json ... ``` 또는 ``` ... ```)
+          let cleanContent = content.trim();
+          if (cleanContent.startsWith("```json")) {
+            cleanContent = cleanContent.slice(7);
+          } else if (cleanContent.startsWith("```")) {
+            cleanContent = cleanContent.slice(3);
+          }
+          if (cleanContent.endsWith("```")) {
+            cleanContent = cleanContent.slice(0, -3);
+          }
+          cleanContent = cleanContent.trim();
+
+          parsed = JSON.parse(cleanContent);
+        } else {
+          // 이미 객체인 경우
+          parsed = content;
         }
 
-        return {
-          headline: parsed.headline || "News Headline",
-          content: articleContent.trim(),
-        };
-      } catch {
+        // parsed가 객체이고 headline과 content 속성이 있는지 확인
+        if (
+          parsed &&
+          typeof parsed === "object" &&
+          parsed.headline &&
+          parsed.content
+        ) {
+          const articleContent = String(parsed.content).trim();
+          const headline = String(parsed.headline).trim();
+          const wordCount = articleContent.split(/\s+/).length;
+
+          // 길이 검증 및 필요시 재요청
+          if (wordCount < config.minWords || wordCount > config.maxWords) {
+            console.warn(
+              `Article word count (${wordCount}) is outside target range (${config.minWords}-${config.maxWords}). Consider regenerating.`
+            );
+          }
+
+          return {
+            headline: headline || "News Headline",
+            content: articleContent,
+          };
+        } else {
+          throw new Error("Invalid JSON structure");
+        }
+      } catch (parseError) {
         // JSON이 아닌 경우 텍스트를 그대로 사용
-        const lines = content.split("\n");
+        console.warn(
+          "Failed to parse JSON response, using text parsing:",
+          parseError
+        );
+        const textContent =
+          typeof content === "string" ? content : JSON.stringify(content);
+        const lines = textContent.split("\n");
         const headline = lines[0] || "News Headline";
-        const articleContent = lines.slice(1).join("\n") || content;
+        const articleContent = lines.slice(1).join("\n") || textContent;
         const wordCount = articleContent.split(/\s+/).length;
 
         console.warn(
@@ -193,14 +240,14 @@ Format your response as JSON with exactly these fields:
         model: "dall-e-3",
         prompt: prompt1,
         n: 1,
-        size: "1792x1024", // Landscape 비율
+        size: "1024x1024", // 정사각형 (생성 속도 향상)
         quality: "standard", // "hd"보다 빠름
       }),
       api.post("/images/generations", {
         model: "dall-e-3",
         prompt: prompt2,
         n: 1,
-        size: "1792x1024", // Landscape 비율
+        size: "1024x1024", // 정사각형 (생성 속도 향상)
         quality: "standard",
       }),
     ]);
@@ -239,7 +286,7 @@ Format your response as JSON with exactly these fields:
       model: "dall-e-3",
       prompt: prompt,
       n: 1,
-      size: "1792x1024", // Landscape 비율
+      size: "1024x1024", // 정사각형 (생성 속도 향상)
       quality: "standard",
     });
 

@@ -18,29 +18,17 @@ const generateTemplateArticle = (level, step1Data) => {
   const dateStr = new Date(step1Data.date).toLocaleDateString();
 
   if (level === "Beginner") {
-    return `On ${dateStr}, ${step1Data.who} had an amazing experience at ${step1Data.where}.
-
-This was a ${step1Data.eventSummary} event. Everyone had a great time. The event was fun and exciting.
-
-People learned many new things. They made new friends too. It was a wonderful day for everyone.`;
+    return `On ${dateStr}, ${step1Data.who} had an amazing experience at ${step1Data.where}. This was a ${step1Data.eventSummary} event. Everyone had a great time. The event was fun and exciting. People learned many new things. They made new friends too. It was a wonderful day for everyone.`;
   } else if (level === "Intermediate") {
-    return `On ${dateStr}, ${step1Data.who} participated in an exciting event at ${step1Data.where}.
+    return `On ${dateStr}, ${step1Data.who} participated in an exciting event at ${step1Data.where}. This was a ${step1Data.eventSummary} event that brought together many people. The event featured interesting activities and presentations that captivated the audience. Participants had the opportunity to learn new skills and share their experiences.
 
-This was a ${step1Data.eventSummary} event that brought together many people. The event featured interesting activities and presentations that captivated the audience. Participants had the opportunity to learn new skills and share their experiences.
-
-The atmosphere was lively and engaging throughout the day. Organizers worked hard to make sure everyone enjoyed themselves. Many people said it was one of the best events they had attended.
-
-The event successfully achieved its goals and left a positive impact on all who attended.`;
+The atmosphere was lively and engaging throughout the day. Organizers worked hard to make sure everyone enjoyed themselves. Many people said it was one of the best events they had attended. The event successfully achieved its goals and left a positive impact on all who attended.`;
   } else {
-    return `On ${dateStr}, ${step1Data.who} was part of a significant ${step1Data.eventSummary} event held at ${step1Data.where}.
-
-This remarkable event brought together a diverse group of participants who shared a common interest in the topic. The event featured comprehensive presentations, interactive workshops, and engaging discussions that provided valuable insights to all attendees. Participants had the opportunity to network with professionals and enthusiasts in the field.
+    return `On ${dateStr}, ${step1Data.who} was part of a significant ${step1Data.eventSummary} event held at ${step1Data.where}. This remarkable event brought together a diverse group of participants who shared a common interest in the topic. The event featured comprehensive presentations, interactive workshops, and engaging discussions that provided valuable insights to all attendees. Participants had the opportunity to network with professionals and enthusiasts in the field.
 
 The organizers demonstrated exceptional planning and execution, ensuring that every aspect of the event ran smoothly. The program included multiple sessions covering various aspects of the topic, allowing attendees to gain a well-rounded understanding. Expert speakers shared their knowledge and experiences, contributing to the overall educational value of the event.
 
-Throughout the day, the atmosphere remained vibrant and intellectually stimulating. Attendees actively participated in discussions, asked thoughtful questions, and engaged with the material presented. The event successfully created a platform for learning, collaboration, and professional development.
-
-The impact of this event extended beyond the immediate experience, as participants left with new knowledge, connections, and inspiration. Many expressed their appreciation for the quality of the content and the opportunity to be part of such a meaningful gathering.`;
+Throughout the day, the atmosphere remained vibrant and intellectually stimulating. Attendees actively participated in discussions, asked thoughtful questions, and engaged with the material presented. The event successfully created a platform for learning, collaboration, and professional development. The impact of this event extended beyond the immediate experience, as participants left with new knowledge, connections, and inspiration. Many expressed their appreciation for the quality of the content and the opportunity to be part of such a meaningful gathering.`;
   }
 };
 
@@ -84,10 +72,39 @@ const Step2Page = () => {
           ...step1Data,
         });
 
+        // 응답 데이터 안전하게 처리
+        let headline = "Sample Headline";
+        let content = "Sample article content...";
+
+        // articleData가 문자열인 경우 파싱 시도
+        if (typeof articleData === "string") {
+          try {
+            const parsed = JSON.parse(articleData);
+            if (parsed && typeof parsed === "object") {
+              headline = String(parsed.headline || headline).trim();
+              content = String(parsed.content || content).trim();
+            }
+          } catch (e) {
+            console.warn("Failed to parse articleData as JSON:", e);
+          }
+        } else if (articleData && typeof articleData === "object") {
+          // 객체인 경우 안전하게 속성 접근
+          headline = String(articleData.headline || headline).trim();
+          content = String(articleData.content || content).trim();
+        }
+
+        // 최종 검증: 값이 비어있거나 잘못된 경우 기본값 사용
+        if (!headline || headline === "null" || headline === "undefined") {
+          headline = "Sample Headline";
+        }
+        if (!content || content === "null" || content === "undefined") {
+          content = "Sample article content...";
+        }
+
         setStep2Data({
           article: {
-            headline: articleData.headline || "Sample Headline",
-            content: articleData.content || "Sample article content...",
+            headline,
+            content,
           },
           images: step2Data.images || [],
           selectedImageIndex: step2Data.selectedImageIndex,
@@ -275,7 +292,7 @@ const Step2Page = () => {
 
           {/* 우측: 이미지 영역 */}
           <div className="bg-gradient-card rounded-3xl shadow-2xl p-4 flex flex-col min-h-0 border-2 border-white/50 backdrop-blur-sm">
-            <div className="flex items-center justify-between mb-2 flex-shrink-0">
+            <div className="flex items-center justify-between mb-1 flex-shrink-0">
               <h3 className="text-lg font-semibold text-kid-text flex items-center gap-2">
                 <div className="p-1.5 rounded-lg bg-kid-primary/10">
                   <PhotoIcon className="w-6 h-6 text-kid-primary" />
@@ -327,9 +344,9 @@ const Step2Page = () => {
               </button>
             </div>
 
-            <div className="flex-1 overflow-hidden min-h-0 py-1">
+            <div className="flex-1 overflow-visible min-h-0 pt-1 px-2 flex flex-col">
               {imageLoading ? (
-                <div className="text-center py-8">
+                <div className="text-center py-6">
                   <div className="p-3 rounded-2xl bg-kid-secondary/10 inline-block mb-4">
                     <PaintBrushIcon className="w-20 h-20 text-kid-secondary animate-bounce" />
                   </div>
@@ -341,7 +358,7 @@ const Step2Page = () => {
                   </p>
                 </div>
               ) : step2Data.images.length === 0 ? (
-                <div className="text-center py-8">
+                <div className="text-center py-6">
                   <div className="p-3 rounded-2xl bg-kid-primary/10 inline-block mb-4">
                     <PhotoIcon className="w-16 h-16 text-kid-primary" />
                   </div>
@@ -351,60 +368,75 @@ const Step2Page = () => {
                   </p>
                 </div>
               ) : (
-                <div className="space-y-2 flex flex-col items-center h-full">
-                  {/* 이미지가 2개 미만일 경우 빈 프레임도 표시 */}
-                  {[0, 1].map((index) => {
-                    const image = step2Data.images[index];
-                    const isEmpty = !image;
-                    return (
-                      <div
-                        key={index}
-                        onClick={() => !isEmpty && handleImageSelect(index)}
-                        className={`rounded-xl overflow-hidden transition-all flex-shrink-0 ${
-                          isEmpty
-                            ? "border-4 border-gray-300 flex items-center justify-center bg-gray-100"
-                            : step2Data.selectedImageIndex === index
-                            ? "border-[6px] border-kid-primary shadow-2xl ring-8 ring-kid-primary/40 cursor-pointer scale-[1.02]"
-                            : "border-4 border-gray-200 hover:border-kid-primary/50 hover:shadow-lg hover:scale-[1.01] cursor-pointer opacity-80 hover:opacity-100"
-                        }`}
-                        style={{
-                          ...(isEmpty
-                            ? {
-                                aspectRatio: "1792 / 1024",
-                                width: "90%",
-                                maxHeight: "calc((100% - 0.5rem) / 2)",
-                              }
-                            : {}),
-                        }}
-                      >
-                        {image ? (
-                          <img
-                            src={image}
-                            alt={`Generated image ${index + 1}`}
-                            className="block w-full h-full object-contain"
-                            style={{
-                              maxHeight: "232px",
-                            }}
-                            onError={(e) => {
-                              e.target.src =
-                                "https://via.placeholder.com/400x300?text=Image+Error";
-                            }}
-                          />
-                        ) : (
-                          <div
-                            className="flex items-center justify-center text-gray-400 text-sm"
-                            style={{
-                              width: "400px",
-                              aspectRatio: "1792 / 1024",
-                            }}
-                          >
-                            <PhotoIcon className="w-8 h-8" />
-                          </div>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                <>
+                  <div className="grid grid-cols-2 gap-4 flex-1 items-start pt-1">
+                    {/* 이미지가 2개 미만일 경우 빈 프레임도 표시 */}
+                    {[0, 1].map((index) => {
+                      const image = step2Data.images[index];
+                      const isEmpty = !image;
+                      return (
+                        <div
+                          key={index}
+                          onClick={() => !isEmpty && handleImageSelect(index)}
+                          className={`rounded-xl overflow-visible transition-all ${
+                            isEmpty
+                              ? "border-4 border-gray-300 flex items-center justify-center bg-gray-100"
+                              : step2Data.selectedImageIndex === index
+                              ? "border-[6px] border-kid-primary shadow-2xl ring-8 ring-kid-primary/40 cursor-pointer scale-[1.02]"
+                              : "border-4 border-gray-200 hover:border-kid-primary/50 hover:shadow-lg hover:scale-[1.01] cursor-pointer opacity-80 hover:opacity-100"
+                          }`}
+                          style={{
+                            ...(isEmpty
+                              ? {
+                                  aspectRatio: "1 / 1",
+                                  width: "100%",
+                                }
+                              : {}),
+                          }}
+                        >
+                          {image ? (
+                            <img
+                              src={image}
+                              alt={`Generated image ${index + 1}`}
+                              className="block w-full h-full object-contain"
+                              style={{
+                                maxHeight: "447px",
+                              }}
+                              onError={(e) => {
+                                e.target.src =
+                                  "https://via.placeholder.com/400x400?text=Image+Error";
+                              }}
+                            />
+                          ) : (
+                            <div
+                              className="flex items-center justify-center text-gray-400 text-sm w-full h-full"
+                              style={{
+                                aspectRatio: "1 / 1",
+                              }}
+                            >
+                              <PhotoIcon className="w-8 h-8" />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                  <div className="text-center mt-3 pt-2 pb-1 flex-shrink-0">
+                    <div className="inline-block px-5 py-3 rounded-2xl bg-gradient-to-r from-kid-primary/20 via-pink-200/30 to-purple-200/30 border-2 border-kid-primary/40 shadow-lg backdrop-blur-sm">
+                      <p className="text-kid-text text-base font-bold flex items-center justify-center gap-3">
+                        <span
+                          className="text-2xl animate-bounce"
+                          style={{ animationDuration: "1.5s" }}
+                        >
+                          📸
+                        </span>
+                        <span className="bg-white/80 px-4 py-1.5 rounded-xl shadow-md">
+                          Please select an image that matches your article.
+                        </span>
+                      </p>
+                    </div>
+                  </div>
+                </>
               )}
             </div>
           </div>

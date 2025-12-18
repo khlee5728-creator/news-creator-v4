@@ -6,7 +6,7 @@ import { format } from "date-fns";
 
 const Step3Page = () => {
   const navigate = useNavigate();
-  const { step1Data, step2Data } = useActivityStore();
+  const { level, step1Data, step2Data } = useActivityStore();
 
   // 컨텐츠의 마지막 페이지에서 실행
   useEffect(() => {
@@ -34,9 +34,27 @@ const Step3Page = () => {
   return (
     <div className="w-full h-full bg-gradient-kid bg-pattern-stars py-8 px-4 overflow-hidden relative">
       <div className="max-w-5xl mx-auto h-full flex flex-col relative z-10">
-        <h2 className="text-xl font-bold text-kid-text mb-6 text-center flex-shrink-0">
-          Step3. Completed Article
-        </h2>
+        {/* Header with title and level button */}
+        <div className="flex justify-between items-center mb-6 flex-shrink-0">
+          <h2 className="text-xl font-bold text-kid-text">
+            Step3. Completed Article
+          </h2>
+          {level && (
+            <div
+              className="px-5 py-2.5 rounded-xl font-bold text-white shadow-lg border-2 border-white/50 backdrop-blur-sm"
+              style={{
+                background:
+                  level === "Beginner"
+                    ? "linear-gradient(135deg, #6366F1 0%, #818CF8 100%)"
+                    : level === "Intermediate"
+                    ? "linear-gradient(135deg, #10B981 0%, #34D399 100%)"
+                    : "linear-gradient(135deg, #F59E0B 0%, #FBBF24 100%)",
+              }}
+            >
+              {level}
+            </div>
+          )}
+        </div>
 
         {/* 신문 기사 포맷 */}
         <div
