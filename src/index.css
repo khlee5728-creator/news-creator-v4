@@ -1,0 +1,155 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: auto; /* 필요시 스크롤 자동 생성 */
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+    "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+#root {
+  /* 스케일링 시스템이 동적으로 스타일을 적용하므로 여기서는 기본값만 설정 */
+  margin: 0;
+  padding: 0;
+  overflow: hidden; /* root는 스크롤 없음 */
+}
+
+#stage {
+  /* 고정 크기 1280x800, 스케일링 시스템이 동적으로 스타일 적용 */
+  margin: 0;
+  padding: 0;
+  overflow: auto; /* 필요시 스크롤 자동 생성 */
+}
+
+/* 스크롤바 숨김 처리 (모든 브라우저 지원) */
+* {
+  /* Firefox */
+  scrollbar-width: none;
+  /* IE and Edge */
+  -ms-overflow-style: none;
+}
+
+/* Webkit 브라우저 (Chrome, Safari, Opera) */
+*::-webkit-scrollbar {
+  display: none;
+  width: 0;
+  height: 0;
+}
+
+/* 스크롤 기능은 유지하면서 스크롤바만 숨김 */
+html,
+body,
+#root,
+* {
+  -webkit-overflow-scrolling: touch; /* iOS 부드러운 스크롤 */
+}
+
+/* 배경 패턴 - 점 패턴 */
+@keyframes float {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-20px);
+  }
+}
+
+.bg-pattern-dots {
+  background-image: radial-gradient(
+    circle,
+    rgba(99, 102, 241, 0.1) 1px,
+    transparent 1px
+  );
+  background-size: 30px 30px;
+  background-position: 0 0, 15px 15px;
+}
+
+.bg-pattern-stars {
+  background-image: radial-gradient(
+      2px 2px at 20px 30px,
+      rgba(236, 72, 153, 0.15),
+      transparent
+    ),
+    radial-gradient(2px 2px at 60px 70px, rgba(99, 102, 241, 0.15), transparent),
+    radial-gradient(1px 1px at 50px 50px, rgba(245, 158, 11, 0.2), transparent),
+    radial-gradient(1px 1px at 80px 20px, rgba(16, 185, 129, 0.15), transparent);
+  background-size: 100px 100px;
+  animation: float 20s ease-in-out infinite;
+}
+
+/* 그라데이션 배경 */
+.bg-gradient-kid {
+  background: linear-gradient(135deg, #fff8e7 0%, #fef3c7 50%, #fde68a 100%);
+}
+
+.bg-gradient-card {
+  background: linear-gradient(135deg, #ffffff 0%, #fff8e7 100%);
+}
+
+.bg-gradient-button {
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+}
+
+.bg-gradient-button-hover {
+  background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+}
+
+/* 버튼 그림자 효과 */
+.shadow-kid {
+  box-shadow: 0 10px 25px -5px rgba(99, 102, 241, 0.3),
+    0 4px 6px -2px rgba(99, 102, 241, 0.2);
+}
+
+.shadow-kid-hover:hover {
+  box-shadow: 0 15px 35px -5px rgba(99, 102, 241, 0.4),
+    0 6px 8px -2px rgba(99, 102, 241, 0.3);
+}
+
+/* 드롭다운 placeholder 텍스트 색상 */
+select.select-placeholder {
+  color: #9ca3af; /* gray-400 */
+}
+
+select.select-placeholder option {
+  color: #1f2937; /* kid-text */
+}
+
+select.select-placeholder option[value=""] {
+  color: #9ca3af; /* gray-400 */
+}
+
+/* 드롭다운 옵션 폰트 크기 통일 */
+select option {
+  font-size: 1rem; /* text-base 16px */
+}
+
+/* 모달 애니메이션 */
+@keyframes scale-in {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.animate-scale-in {
+  animation: scale-in 0.2s ease-out;
+}
+
+/* 신문 기사 프레임 - 내용 초과 시에만 스크롤 */
+.news-article-format {
+  overflow: auto;
+}
